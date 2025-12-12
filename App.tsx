@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { HeroCarousel } from './components/HeroCarousel';
 import { ProductCard } from './components/ProductCard';
@@ -7,11 +7,75 @@ import { CartSidebar } from './components/CartSidebar';
 import { LoginModal } from './components/LoginModal';
 import { Footer } from './components/Footer';
 import { PaymentSettings } from './components/PaymentSettings';
+import { Wishlist } from './components/Wishlist';
+import { RegisterPage } from './components/RegisterPage';
+import { AdminDashboard } from './components/AdminDashboard';
+import { AdminLoginPage } from './components/AdminLoginPage';
+import { ChatWidget } from './components/ChatWidget';
+import { CheckoutPage } from './components/CheckoutPage';
 import { CATEGORIES, PRODUCTS, REVIEWS } from './constants';
-import { CartItem, Product, Category } from './types';
-import { Star, MessageCircle } from 'lucide-react';
+import { CartItem, Product, Category, User, Order, Promotion } from './types';
+import { Star } from 'lucide-react';
+import { authService } from './auth';
+
+// Helper for safe JSON parsing
+const safeParse = (key: string, fallback: any) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 const App: React.FC = () => {
+  // --- GLOBAL STATE ---
+  const [products, setProducts] = useState<Product[]>(() => {
+    const stored = safeParse('natal_store_products', null);
+    // Merge stock and isActive if loading from legacy constants
+    if (!stored) return PRODUCTS.map(p => ({ ...p, stock: 100, isActive: true }));
+    return stored;
+  });
+
+  const [orders, setOrders] = useState<Order[]>(() => {
+    return safeParse('natal_store_orders', [
+      {
+        id: 'ORD-2023-001',
+        userId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
+        userName: 'Cliente Exemplo',
+        userEmail: 'cliente@exemplo.com',
+        items: [PRODUCTS[0], PRODUCTS[1]].map(p => ({...p, quantity: 1, stock: 100, isActive: true})),
+        total: 99.77,
+        status: 'Pago',
+        date: '2023-11-20T10:30:00Z',
+        shippingAddress: 'Rua das Flores, 123 - São Paulo, SP',
+        paymentMethod: 'Pix'
+      }
+    ]);
+  });
+
+  const [users, setUsers] = useState<User[]>(() => {
+    const dbUsers = safeParse('natal_store_users_db', []);
+    if (dbUsers.length === 0) {
+      // Mock initial data if empty
+      return [
+         { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Administrador', email: 'mauriciosntt@gmail.com', role: 'ADMIN', status: 'Active', phone: '11999999999' },
+         { id: '7c9e6679-7425-40de-944b-e07fc1f90ae7', name: 'Cliente Exemplo', email: 'cliente@exemplo.com', role: 'USER', status: 'Active', phone: '11988888888', address: { street: 'Rua das Flores', number: '123', city: 'São Paulo', state: 'SP', zip: '01000-000' } }
+      ];
+    }
+    return dbUsers;
+  });
+
+  const [promotions, setPromotions] = useState<Promotion[]>(() => safeParse('natal_store_promotions', []));
+
+  // --- PERSISTENCE ---
+  useEffect(() => localStorage.setItem('natal_store_products', JSON.stringify(products)), [products]);
+  useEffect(() => localStorage.setItem('natal_store_orders', JSON.stringify(orders)), [orders]);
+  useEffect(() => localStorage.setItem('natal_store_promotions', JSON.stringify(promotions)), [promotions]);
+  // Users are handled by auth.ts usually, but for the dashboard view we sync state here
+  useEffect(() => localStorage.setItem('natal_store_users_db', JSON.stringify(users)), [users]);
+
+
   const [activeCategory, setActiveCategory] = useState<Category>('Todas');
   const [searchTerm, setSearchTerm] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -19,8 +83,34 @@ const App: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // Initialize Auth
+  useEffect(() => {
+    try {
+      const user = authService.getSession();
+      if (user) {
+        setCurrentUser(user);
+      }
+    } catch (error) {
+      console.error('Failed to restore session:', error);
+    }
+  }, []);
+
+  // Wishlist State with safe localStorage
+  const [wishlist, setWishlist] = useState<Product[]>(() => safeParse('natal_wishlist', []));
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('natal_wishlist', JSON.stringify(wishlist));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [wishlist]);
+  
   // View State
-  const [currentView, setCurrentView] = useState<'home' | 'product' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'product' | 'admin' | 'wishlist' | 'register' | 'admin-dashboard' | 'admin-login' | 'checkout'>('home');
 
   // Cart Logic
   const addToCart = (product: Product) => {
@@ -50,14 +140,31 @@ const App: React.FC = () => {
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Filtering
-  const filteredProducts = PRODUCTS.filter(p => {
+  // Wishlist Logic
+  const toggleWishlist = (product: Product) => {
+    setWishlist(prev => {
+      const exists = prev.find(p => p.id === product.id);
+      if (exists) {
+        return prev.filter(p => p.id !== product.id);
+      }
+      return [...prev, product];
+    });
+  };
+
+  const isProductWishlisted = (productId: number) => {
+    return wishlist.some(p => p.id === productId);
+  };
+
+  // Filtering (Only Active Products)
+  const activeProducts = products.filter(p => p.isActive);
+
+  const filteredProducts = activeProducts.filter(p => {
     const matchesCategory = activeCategory === 'Todas' || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const featuredOffers = PRODUCTS.filter(p => p.isFeatured && p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const featuredOffers = activeProducts.filter(p => p.isFeatured && p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Navigation Handlers
   const handleProductClick = (product: Product) => {
@@ -72,15 +179,149 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAdminLogin = () => {
-    setCurrentView('admin');
+  const handleCheckout = () => {
+    setIsCartOpen(false);
+    setCurrentView('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePlaceOrder = (data: any) => {
+    // In a real app, this would send to backend
+    // For now, clear cart after "success" view handled by CheckoutPage
+    setTimeout(() => {
+      setCartItems([]);
+      handleBackToHome();
+    }, 5000); // Redirect home after 5s of success message
+  };
+
+  // Auth Handlers
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    setIsLoginOpen(false);
+    if (user.role === 'ADMIN') {
+      setCurrentView('admin-dashboard');
+    }
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
+    setCurrentUser(null);
+    handleBackToHome();
+  };
+
+  const handleRegister = () => {
+    setIsLoginOpen(false);
+    setCurrentView('register');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenWishlist = () => {
+    setCurrentView('wishlist');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const handleAdminAccess = () => {
+    setIsLoginOpen(false);
+    setCurrentView('admin-login');
+  }
+
+  // ADMIN DATA HANDLERS
+  const updateProduct = (updated: Product) => {
+    setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
+  };
+  const addProduct = (newProduct: Product) => {
+    setProducts(prev => [...prev, newProduct]);
+  };
+  const deleteProduct = (id: number) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+  };
+
+  const updateUser = (updated: User) => {
+    setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+  };
+
+  const updateOrder = (updated: Order) => {
+    setOrders(prev => prev.map(o => o.id === updated.id ? updated : o));
+  };
+
+  const addPromotion = (promo: Promotion) => {
+    setPromotions(prev => [...prev, promo]);
+  };
+  const deletePromotion = (id: string) => {
+    setPromotions(prev => prev.filter(p => p.id !== id));
   };
 
   // Render content based on current view
   const renderContent = () => {
+    if (currentView === 'admin-login') {
+      return (
+        <AdminLoginPage 
+          onBack={handleBackToHome} 
+          onLoginSuccess={handleLoginSuccess} 
+        />
+      );
+    }
+
+    if (currentView === 'admin-dashboard') {
+      // Protected Route Check
+      if (!currentUser || currentUser.role !== 'ADMIN') {
+        setCurrentView('home');
+        return null;
+      }
+      return (
+        <AdminDashboard 
+          onLogout={handleLogout} 
+          users={users}
+          orders={orders}
+          products={products}
+          promotions={promotions}
+          onUpdateProduct={updateProduct}
+          onAddProduct={addProduct}
+          onDeleteProduct={deleteProduct}
+          onUpdateUser={updateUser}
+          onUpdateOrder={updateOrder}
+          onAddPromotion={addPromotion}
+          onDeletePromotion={deletePromotion}
+        />
+      );
+    }
+
     if (currentView === 'admin') {
+       if (!currentUser || currentUser.role !== 'ADMIN') {
+        setCurrentView('home');
+        return null;
+      }
       return <PaymentSettings onBack={handleBackToHome} />;
+    }
+
+    if (currentView === 'register') {
+      return <RegisterPage onBack={handleBackToHome} onRegisterSuccess={handleLoginSuccess} />;
+    }
+
+    if (currentView === 'checkout') {
+      return (
+        <CheckoutPage 
+          cartItems={cartItems}
+          user={currentUser}
+          onBack={() => {
+            setCurrentView('home');
+            setIsCartOpen(true);
+          }}
+          onPlaceOrder={handlePlaceOrder}
+        />
+      );
+    }
+
+    if (currentView === 'wishlist') {
+      return (
+        <Wishlist 
+          items={wishlist} 
+          onAddToCart={addToCart} 
+          onToggleWishlist={toggleWishlist}
+          onProductClick={handleProductClick}
+          onContinueShopping={handleBackToHome}
+        />
+      );
     }
 
     if (currentView === 'product' && selectedProduct) {
@@ -89,6 +330,8 @@ const App: React.FC = () => {
           product={selectedProduct} 
           onBack={handleBackToHome}
           onAddToCart={addToCart}
+          isWishlisted={isProductWishlisted(selectedProduct.id)}
+          onToggleWishlist={toggleWishlist}
         />
       );
     }
@@ -113,6 +356,8 @@ const App: React.FC = () => {
                   product={product} 
                   onAddToCart={addToCart}
                   onClick={handleProductClick}
+                  isWishlisted={isProductWishlisted(product.id)}
+                  onToggleWishlist={toggleWishlist}
                 />
               ))}
             </div>
@@ -155,6 +400,8 @@ const App: React.FC = () => {
                   product={product} 
                   onAddToCart={addToCart}
                   onClick={handleProductClick}
+                  isWishlisted={isProductWishlisted(product.id)}
+                  onToggleWishlist={toggleWishlist}
                 />
               ))}
             </div>
@@ -205,12 +452,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      {/* Hide standard Header if in Admin view */}
-      {currentView !== 'admin' && (
+      {/* Hide standard Header if in Admin views */}
+      {(currentView !== 'admin' && currentView !== 'register' && currentView !== 'admin-dashboard' && currentView !== 'admin-login') && (
         <Header 
           cartCount={cartCount} 
+          wishlistCount={wishlist.length}
           onOpenCart={() => setIsCartOpen(true)}
           onOpenLogin={() => setIsLoginOpen(true)}
+          onOpenWishlist={handleOpenWishlist}
           onSearch={(term) => {
             setSearchTerm(term);
             if (currentView !== 'home' && term) {
@@ -218,6 +467,9 @@ const App: React.FC = () => {
               setSelectedProduct(null);
             }
           }}
+          onLogoClick={handleBackToHome}
+          user={currentUser}
+          onLogout={handleLogout}
         />
       )}
 
@@ -225,8 +477,8 @@ const App: React.FC = () => {
         {renderContent()}
       </main>
 
-      {/* Hide standard Footer if in Admin view */}
-      {currentView !== 'admin' && <Footer />}
+      {/* Hide standard Footer if in Admin views */}
+      {(currentView !== 'admin' && currentView !== 'register' && currentView !== 'admin-dashboard' && currentView !== 'admin-login' && currentView !== 'checkout') && <Footer />}
 
       <CartSidebar 
         isOpen={isCartOpen} 
@@ -234,23 +486,20 @@ const App: React.FC = () => {
         cartItems={cartItems}
         onRemove={removeFromCart}
         onUpdateQuantity={updateQuantity}
+        onCheckout={handleCheckout}
       />
       
       <LoginModal 
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)} 
-        onAdminLogin={handleAdminLogin}
+        onLoginSuccess={handleLoginSuccess}
+        onRegister={handleRegister}
+        onAdminAccess={handleAdminAccess}
       />
 
-      {/* Floating Whatsapp Button */}
-      {currentView !== 'admin' && (
-        <a 
-          href="#"
-          className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors z-40 hover:scale-110 duration-300"
-          title="Fale conosco no WhatsApp"
-        >
-          <MessageCircle size={28} fill="white" />
-        </a>
+      {/* Chat Widget */}
+      {(currentView !== 'admin' && currentView !== 'register' && currentView !== 'admin-dashboard' && currentView !== 'admin-login') && (
+        <ChatWidget />
       )}
     </div>
   );

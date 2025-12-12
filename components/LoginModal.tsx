@@ -1,13 +1,37 @@
-import React from 'react';
-import { X, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Shield, AlertCircle } from 'lucide-react';
+import { authService } from '../auth';
+import { User } from '../types';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdminLogin?: () => void;
+  onLoginSuccess: (user: User) => void;
+  onRegister?: () => void;
+  onAdminAccess?: () => void;
 }
 
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onAdminLogin }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, onRegister, onAdminAccess }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const user = await authService.login(email, password);
+      onLoginSuccess(user);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao entrar. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -30,20 +54,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onAdmin
           <p className="text-gray-500">Entre para acessar seus pedidos e favoritos.</p>
         </div>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle size={16} />
+              {error}
+            </div>
+          )}
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-christmas-dark mb-1">Email</label>
             <input 
               type="email" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-christmas-green focus:border-transparent outline-none transition-all"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-christmas-green/30 bg-white text-christmas-dark placeholder-christmas-green/40 focus:ring-2 focus:ring-christmas-green focus:border-transparent outline-none transition-all"
               placeholder="seu@email.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <label className="block text-sm font-medium text-christmas-dark mb-1">Senha</label>
             <input 
               type="password" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-christmas-green focus:border-transparent outline-none transition-all"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-christmas-green/30 bg-white text-christmas-dark placeholder-christmas-green/40 focus:ring-2 focus:ring-christmas-green focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
             />
           </div>
@@ -56,21 +93,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onAdmin
             <a href="#" className="text-christmas-red hover:underline">Esqueceu a senha?</a>
           </div>
 
-          <button className="w-full bg-christmas-green hover:bg-christmas-dark text-white font-bold py-3 rounded-lg shadow-md transition-transform active:scale-[0.98]">
-            Entrar
+          <button 
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-christmas-green hover:bg-christmas-dark text-white font-bold py-3 rounded-lg shadow-md transition-transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
+          >
+            {isLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"/> : 'Entrar'}
           </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          Não tem uma conta? <a href="#" className="text-christmas-green font-bold hover:underline">Cadastre-se</a>
+          Não tem uma conta?{' '}
+          <button 
+            onClick={() => {
+              onClose();
+              if (onRegister) onRegister();
+            }}
+            className="text-christmas-green font-bold hover:underline"
+          >
+            Cadastre-se
+          </button>
         </div>
 
         {/* Admin Access Link */}
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
           <button 
             onClick={() => {
-              onClose();
-              if (onAdminLogin) onAdminLogin();
+              if (onAdminAccess) onAdminAccess();
             }}
             className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-christmas-green transition-colors"
           >

@@ -8,9 +8,10 @@ interface CartSidebarProps {
   cartItems: CartItem[];
   onRemove: (id: number) => void;
   onUpdateQuantity: (id: number, delta: number) => void;
+  onCheckout: () => void;
 }
 
-export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartItems, onRemove, onUpdateQuantity }) => {
+export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartItems, onRemove, onUpdateQuantity, onCheckout }) => {
   const [zipCode, setZipCode] = useState('');
   const [shippingCost, setShippingCost] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -69,7 +70,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartI
                   className="w-16 h-16 object-cover rounded-md border border-gray-200" 
                 />
                 <div className="flex-1">
-                  <h4 className="font-semibold text-sm text-gray-800 line-clamp-1">{item.name}</h4>
+                  <h4 className="font-semibold text-sm text-christmas-dark line-clamp-1">{item.name}</h4>
                   <div className="text-christmas-red font-bold text-sm">
                     R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
                   </div>
@@ -104,7 +105,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartI
           <div className="p-5 border-t border-gray-100 bg-gray-50">
             {/* Shipping Calc in Cart */}
             <div className="mb-4">
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Calcular Frete</label>
+              <label className="text-xs font-semibold text-christmas-dark mb-1 block">Calcular Frete</label>
               <div className="flex gap-2">
                 <input 
                   type="text" 
@@ -116,7 +117,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartI
                      setZipCode(val);
                      if (val.length < 8) setShippingCost(null);
                   }}
-                  className="flex-1 border border-christmas-green/30 rounded px-3 py-2 text-sm focus:outline-none focus:border-christmas-green focus:ring-1 focus:ring-christmas-green/50 bg-white"
+                  className="flex-1 border border-christmas-green/30 rounded px-3 py-2 text-sm focus:outline-none focus:border-christmas-green focus:ring-1 focus:ring-christmas-green/50 bg-white text-christmas-dark placeholder-christmas-green/50"
                 />
                 <button 
                   onClick={handleCalculateShipping}
@@ -139,13 +140,19 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, cartI
                   <span>R$ {shippingCost.toFixed(2).replace('.', ',')}</span>
                 </div>
               )}
-              <div className="flex justify-between items-center text-lg font-bold text-gray-800 pt-2 border-t border-gray-200">
+              <div className="flex justify-between items-center text-lg font-bold text-christmas-dark pt-2 border-t border-gray-200">
                 <span>Total</span>
                 <span>R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
             </div>
 
-            <button className="w-full bg-christmas-green hover:bg-christmas-dark text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]">
+            <button 
+              onClick={() => {
+                onClose();
+                onCheckout();
+              }}
+              className="w-full bg-christmas-green hover:bg-christmas-dark text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]"
+            >
               Finalizar Compra
             </button>
           </div>

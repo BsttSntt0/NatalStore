@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingCart, Star, Truck, ShieldCheck, Share2, MapPin, Box, Calendar } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Star, Truck, ShieldCheck, Share2, Box, Calendar, Heart } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductDetailsProps {
   product: Product;
   onBack: () => void;
   onAddToCart: (product: Product) => void;
+  isWishlisted: boolean;
+  onToggleWishlist: (product: Product) => void;
 }
 
 type Tab = 'description' | 'specs' | 'reviews';
 
-export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onAddToCart }) => {
+export const ProductDetails: React.FC<ProductDetailsProps> = ({ 
+  product, 
+  onBack, 
+  onAddToCart,
+  isWishlisted,
+  onToggleWishlist
+}) => {
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [activeTab, setActiveTab] = useState<Tab>('description');
   
@@ -114,12 +122,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack,
                 <span className="text-sm font-bold text-christmas-green uppercase tracking-wider bg-christmas-green/10 px-2 py-1 rounded">
                   {product.category}
                 </span>
-                <button className="text-gray-400 hover:text-christmas-gold transition-colors">
-                  <Share2 size={20} />
-                </button>
+                <div className="flex gap-2">
+                   <button 
+                    onClick={() => onToggleWishlist(product)}
+                    className="text-gray-400 hover:text-christmas-red transition-colors p-1"
+                    title={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  >
+                    <Heart size={24} className={isWishlisted ? 'fill-christmas-red text-christmas-red' : ''} />
+                  </button>
+                  <button className="text-gray-400 hover:text-christmas-gold transition-colors p-1">
+                    <Share2 size={24} />
+                  </button>
+                </div>
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-display font-bold text-gray-800 mb-4 leading-tight">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-christmas-dark mb-4 leading-tight">
                 {product.name}
               </h1>
 
@@ -161,7 +178,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack,
                     value={zipCode}
                     onChange={handleZipChange}
                     maxLength={8}
-                    className="flex-1 border border-christmas-green/30 rounded px-3 py-2 text-sm focus:outline-none focus:border-christmas-green focus:ring-1 focus:ring-christmas-green/50 text-christmas-dark placeholder-gray-400 bg-green-50/20"
+                    className="flex-1 border border-christmas-green/30 rounded px-3 py-2 text-sm focus:outline-none focus:border-christmas-green focus:ring-1 focus:ring-christmas-green/50 text-christmas-dark placeholder-christmas-green/50 bg-white"
                   />
                   <button 
                     onClick={() => zipCode.length === 8 && calculateShipping(zipCode)}

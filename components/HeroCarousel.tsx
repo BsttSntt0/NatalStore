@@ -4,23 +4,26 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const SLIDES = [
   {
     id: 1,
-    image: 'https://picsum.photos/id/42/1600/600',
+    // Imagem do Produto 1 (Cortina de Leds)
+    image: 'https://down-br.img.susercontent.com/file/br-11134207-7r98o-lz0sx7cxfb85dd@resize_w450_nl.webp',
     title: 'A Magia do Natal Começa Aqui',
     subtitle: 'Decore sua casa com elegância e tradição.',
     cta: 'Ver Coleção'
   },
   {
     id: 2,
-    image: 'https://picsum.photos/id/292/1600/600',
+    // Imagem do Produto 2 (Mangueira Led)
+    image: 'https://down-br.img.susercontent.com/file/sg-11134201-824jb-mffonp1ob66j88@resize_w450_nl.webp',
     title: 'Luzes que Encantam',
     subtitle: 'Ilumine seu natal com nossas cascatas e pisca-piscas LED.',
     cta: 'Confira as Ofertas'
   },
   {
     id: 3,
-    image: 'https://picsum.photos/id/353/1600/600',
-    title: 'Mesas Postas Inesquecíveis',
-    subtitle: 'Tudo para sua ceia ser o momento mais especial do ano.',
+    // Imagem da Luz Solar (Decoração Externa)
+    image: 'https://images.unsplash.com/photo-1610052570742-15967b57b12c?auto=format&fit=crop&q=80&w=1600',
+    title: 'Decoração Externa',
+    subtitle: 'Deixe sua fachada brilhando neste Natal com nossos produtos solares.',
     cta: 'Comprar Agora'
   }
 ];

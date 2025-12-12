@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Security: Force HTTPS for all resources -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Natal Store - Artigos Natalinos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
@@ -55,7 +57,7 @@
 }
 </script>
 </head>
-  <body class="bg-christmas-snow text-gray-800 antialiased">
+  <body class="bg-christmas-snow text-christmas-dark antialiased">
     <div id="root"></div>
   </body>
 </html>

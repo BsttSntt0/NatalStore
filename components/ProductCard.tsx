@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Heart } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   onClick: (product: Product) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ 
+  product, 
+  onAddToCart, 
+  onClick, 
+  isWishlisted = false, 
+  onToggleWishlist 
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div 
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group h-full border border-gray-100 cursor-pointer"
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group h-full border border-gray-100 cursor-pointer relative"
       onClick={() => onClick(product)}
     >
       <div className="relative overflow-hidden aspect-square bg-gray-100">
@@ -31,13 +39,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, 
             OFERTA
           </div>
         )}
+        
+        {onToggleWishlist && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWishlist(product);
+            }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white text-gray-400 hover:text-christmas-red shadow-sm z-10 backdrop-blur-sm transition-colors"
+            title={isWishlisted ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
+            <Heart size={18} className={`transition-colors ${isWishlisted ? 'fill-christmas-red text-christmas-red' : ''}`} />
+          </button>
+        )}
       </div>
       
       <div className="p-4 flex flex-col flex-grow">
         <div className="text-xs text-christmas-green font-bold uppercase tracking-wider mb-1">
           {product.category}
         </div>
-        <h3 className="text-gray-800 font-semibold mb-2 line-clamp-2 min-h-[3rem] group-hover:text-christmas-red transition-colors">
+        <h3 className="text-christmas-dark font-semibold mb-2 line-clamp-2 min-h-[3rem] group-hover:text-christmas-red transition-colors">
           {product.name}
         </h3>
         

@@ -32,7 +32,9 @@ export const PRODUCTS: Product[] = [
     rating: 5,
     description: 'Transforme qualquer ambiente com a mágica da Cortina de 400 LEDs. Ideal para decorações de Natal, casamentos e festas, ela proporciona um efeito cascata deslumbrante. Resistente e fácil de instalar, cobre uma área de 3x4 metros com brilho intenso e econômico.',
     specifications: ['Voltagem: 110v/220v (Bivolt)', 'Quantidade de LEDs: 400', 'Dimensões: 3m (altura) x 4m (largura)', 'Cor do fio: Transparente', 'Modos de luz: 8 funções'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 50,
+    isActive: true
   },
   {
     id: 2,
@@ -52,7 +54,9 @@ export const PRODUCTS: Product[] = [
     specifications: ['Tensão: 220V', 'Proteção: IP65 (Uso externo)', 'Espessura: 11mm', 'Vida útil: 50.000 horas', 'Corte: A cada 1 metro'],
     reviews: [
       { id: 101, name: 'Roberto M.', comment: 'Iluminação forte, ficou lindo no jardim.', rating: 5, date: '01/11/2024' }
-    ]
+    ],
+    stock: 150,
+    isActive: true
   },
   {
     id: 3,
@@ -69,7 +73,9 @@ export const PRODUCTS: Product[] = [
     isFeatured: true,
     description: 'Destaque sua casa neste Natal com a Mangueira LED de alta performance. Com revestimento de silicone de alta qualidade, não amarela com o tempo e resiste a chuvas. Ideal para criar desenhos e contornos iluminados.',
     specifications: ['Material: Silicone flexível', 'Cores: Branco Frio, Branco Quente, Azul, Verde, Vermelho', 'Potência: 4.8W/metro'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 80,
+    isActive: true
   },
   {
     id: 4,
@@ -82,7 +88,9 @@ export const PRODUCTS: Product[] = [
     rating: 4,
     description: 'Receba seus convidados com estilo. Guirlanda artesanal com pinhas naturais, laços de veludo e acabamento premium.',
     specifications: ['Diâmetro: 40cm', 'Material: PVC e Tecido', 'Uso: Interno/Externo coberto'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 20,
+    isActive: true
   },
   {
     id: 5,
@@ -95,7 +103,9 @@ export const PRODUCTS: Product[] = [
     rating: 5,
     description: 'A atração principal da vizinhança! Papai Noel gigante com motor embutido que infla em segundos. Possui luzes internas para destaque noturno.',
     specifications: ['Altura: 2.0 metros', 'Voltagem: Bivolt', 'Incluso: Estacas e cordas para fixação'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 10,
+    isActive: true
   },
   {
     id: 6,
@@ -107,7 +117,9 @@ export const PRODUCTS: Product[] = [
     rating: 4,
     description: 'Elegância para sua ceia. Toalha com bordados dourados e tecido repelente a líquidos.',
     specifications: ['Tamanho: 2.20m x 1.40m', 'Tecido: Jacquard', 'Lugares: 6 a 8'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 35,
+    isActive: true
   },
   {
     id: 7,
@@ -119,7 +131,9 @@ export const PRODUCTS: Product[] = [
     rating: 5,
     description: 'Árvore pinheiro com efeito de neve nas pontas. Galhos cheios e estruturados para suportar enfeites pesados.',
     specifications: ['Altura: 1.50m', 'Galhos: 450 ramos', 'Base: Metal reforçado'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 15,
+    isActive: true
   },
   {
     id: 8,
@@ -131,7 +145,9 @@ export const PRODUCTS: Product[] = [
     rating: 3,
     description: 'O toque final que sua árvore merece. Estrela com luz LED interna pulsante.',
     specifications: ['Tamanho: 20cm', 'Alimentação: 2 Pilhas AA', 'Material: Acrílico'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 100,
+    isActive: true
   },
   {
     id: 9,
@@ -145,7 +161,9 @@ export const PRODUCTS: Product[] = [
     rating: 4.8,
     description: 'Luzes LED de alta qualidade para decorar grandes espaços com economia e segurança.',
     specifications: ['Tamanho: 3x4m', 'Lâmpadas: LED', 'Cor: Branco Quente'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 200,
+    isActive: true
   },
   {
     id: 10,
@@ -157,7 +175,9 @@ export const PRODUCTS: Product[] = [
     rating: 5,
     description: 'Conjunto de guardanapos 100% algodão com estampas exclusivas de Natal.',
     specifications: ['Quantidade: 6 unidades', 'Tamanho: 45x45cm', 'Tecido: Algodão'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 60,
+    isActive: true
   },
   {
     id: 11,
@@ -174,7 +194,9 @@ export const PRODUCTS: Product[] = [
     isFeatured: true,
     description: 'Decoração sustentável e encantadora. Regador solar que projeta luzes simulando água, com silhueta de Papai Noel.',
     specifications: ['Painel Solar: Incluso', 'Autonomia: Até 8 horas', 'Instalação: Espeto de jardim'],
-    reviews: []
+    reviews: [],
+    stock: 40,
+    isActive: true
   },
   {
     id: 12,
@@ -186,7 +208,9 @@ export const PRODUCTS: Product[] = [
     rating: 4,
     description: 'Boneco de neve simpático para áreas internas ou externas.',
     specifications: ['Altura: 1.20m', 'Material: Poliéster impermeável'],
-    reviews: DEFAULT_REVIEWS
+    reviews: DEFAULT_REVIEWS,
+    stock: 25,
+    isActive: true
   }
 ];
 
